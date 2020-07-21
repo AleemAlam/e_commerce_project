@@ -1,0 +1,74 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block adminbody %}
+
+<div class="container-fluid">
+  <div class="row mb-5">
+    <div class="col-xl-10 col-lg-9 col-md-8 ml-auto">
+      <div class="row align-items-center">
+        <div class="col-12 mb-4 mb-xl-0">
+          <table class="table mt-5 bg-light text-center">
+              <tr>
+                  <td><h3>Search User</h3></td>
+              </tr>
+              <tr>    
+                  <form method="GET">
+                      <td>
+                          <div class="form-group">
+                              <div class="row">
+                                  <div class="col-10">
+                                      <input type="text" name="user" class="form-control" placeholder="Search User">
+                                  </div>
+                                  <div class="col-2">
+                                      <button type="submit" class="btn btn-primary">Search</button>
+                                  </div>
+                              </div>
+                          </div>
+                      </td>
+                  </form>
+              </tr>
+          </table>
+      </div>
+  </div>
+  </div>
+</div>
+</div>
+
+<section>
+  <div class="container-fluid">
+    <div class="row mb-5">
+      <div class="col-xl-10 col-lg-9 col-md-8 ml-auto">
+        <div class="row align-items-center">
+          <div class="col-12 mb-4 mb-xl-0">
+            <h3 class="text-muted text-center mb-3">All Users</h3>
+            <table class="table table-striped bg-light text-center">
+              <thead>
+                <tr data-toggle="modal" class="click text-muted" data-target="#userDetails">
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Address</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for object in object_list %}
+                <tr data-toggle="modal" class="click" data-target="#userDetails">
+                  <th>1</th>
+                  <td>{{object.username}}</td>
+                  <td>{{object.email}}</td>
+                  <td>{{object.address}}</td>
+                  <td><button class="btn btn-{% if object.is_active %}success{% else %}danger{% endif %}" disabled>{% if object.is_active %}Active{% else %}Inactive{% endif %}</button></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{% endblock %}

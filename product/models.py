@@ -15,7 +15,7 @@ class Item(models.Model):
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     description = models.TextField()
     image = models.ImageField('items')
-    discount_price = models.FloatField(blank=True, null=True)
+    discount_price = models.FloatField(blank=True, null=True, default=0)
 
     def no_of_ratings(self):
         ratings = Rating.objects.filter(item=self)
