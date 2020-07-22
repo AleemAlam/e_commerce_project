@@ -3,6 +3,18 @@ from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
+class UserProfile(models.Model):
+    user = models.ForeignKey(User, related_name='UserProfiles', on_delete=models.CASCADE)
+    country = models.CharField(max_length=50, default='India')
+    city = models.CharField(max_length=100, default='')
+    phone = models.CharField(max_length=15,default='')
+    image = models.ImageField(upload_to='profile_image', blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class Category(models.Model):
     title = models.CharField(max_length=200, unique=True)
     def __str__(self):
