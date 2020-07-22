@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, related_name='UserProfiles', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='user_profile', on_delete=models.CASCADE)
     country = models.CharField(max_length=50, default='India')
     city = models.CharField(max_length=100, default='')
     phone = models.CharField(max_length=15,default='')
