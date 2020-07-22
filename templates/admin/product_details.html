@@ -3,6 +3,8 @@
 {% load crispy_forms_tags %}
 {% block adminbody %}
 
+
+
 <section>
     <div class="container-fluid">
       <div class="row mb-5">
@@ -11,6 +13,7 @@
             <div class="col-12 mb-4 mb-xl-0">
               <h3 class="text-muted text-center mb-3">Product Details</h3>
               <table class="table">
+                {% include 'admin/messages.html' %}
                 <tr>
                     <th>
                         <a data-toggle="modal" class="click" style="color: red; " data-target="#deleteProduct" data-dismiss="modal"><i class="fa fa-trash" style="color: red; font-size: 1.5em;"></i>
@@ -19,7 +22,7 @@
                     </th>
                     <td></td>
                     <th>
-                        <a data-toggle="modal" class="click" style="color:lightblue; " data-target="#editProduct" data-dismiss="modal"   ><i class="fa fa-edit" style="color: lightblue; font-size: 1.5em;"></i>
+                        <a data-toggle="modal" class="click" style="color:green; " data-target="#editProduct" data-dismiss="modal"   ><i class="fa fa-edit" style="color: green; font-size: 1.5em;"></i>
                         Edit This Product
                         </a>
                     </th>

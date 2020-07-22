@@ -1,0 +1,19 @@
+{% if messages %}
+{% for message in messages %}
+{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+<div style="text-align: center;" class="alert alert-danger">
+{{message}}
+</div>
+{% endif %}
+{% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+<div style="text-align: center;" class="alert alert-success">
+{{message}}
+</div>
+{% endif %}
+{% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+<div style="text-align: center;" class="alert alert-info">
+{{message}}
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
