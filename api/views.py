@@ -35,8 +35,8 @@ class ProfileUpdateAPIView(generics.UpdateAPIView):
 class Profile(APIView):
     def get(self, request, format=None):
         try:
-            user = UserProfile.objects.filter(user = self.request.user)
-            serializer = UserProfileSerializer(user, many=True)
+            user = UserProfile.objects.get(user = request.user)
+            serializer = UserProfileSerializer(user)
             return Response(serializer.data)
         except:
             raise ValidationError('You need to log in first')

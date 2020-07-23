@@ -5,8 +5,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='user_profile', on_delete=models.CASCADE)
-    country = models.CharField(max_length=50, default='India')
-    city = models.CharField(max_length=100, default='')
     phone = models.CharField(max_length=15,default='')
     image = models.ImageField(upload_to='profile_image', blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
@@ -98,3 +96,14 @@ class Rating(models.Model):
 
     def __str__(self):
         return self.item.title
+
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, blank=True, null=True)
+    order = models.ForeignKey(Order, on_delete= models.SET_NULL, blank=True, null=True)
+    address = models.CharField(max_length=200, null=True)
+    city = models.CharField(max_length=50, null=True)
+    state = models.CharField(max_length=50, null=True)
+    zipcode = models.CharField(max_length=10, null=True)
+
+    def __str__(self):
+        return self.address+ ' address of ' + self.user.user.username
