@@ -1,27 +1,16 @@
-from django.shortcuts import render
-from .serializers import  UserProfileSerializer, ItemSerializer
+from django.shortcuts import render, get_object_or_404
+from .serializers import  UserProfileSerializer, ItemSerializer, OrderSerializer
 from rest_framework.views import APIView
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
+from django.utils import timezone
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from product.models import UserProfile, Item
+from product.models import UserProfile, Item, Cart, Order
+from django.core.exceptions import ObjectDoesNotExist
 
-
-class ProfileCreateView(generics.CreateAPIView):
-    serializer_class = UserProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return UserProfile.objects.filter(user = user)
-
-    def perform_create(self, serializer):
-        if self.get_queryset().exists():
-            raise ValidationError('User is already exist')
-        serializer.save(user = self.request.user)
-    
 
 class ProfileUpdateAPIView(generics.UpdateAPIView):
     serializer_class = UserProfileSerializer
@@ -32,14 +21,23 @@ class ProfileUpdateAPIView(generics.UpdateAPIView):
         return UserProfile.objects.filter(user = user)
 
 
-class Profile(APIView):
+class Profile(LoginRequiredMixin, APIView):
     def get(self, request, format=None):
         try:
-            user = UserProfile.objects.get(user = request.user)
-            serializer = UserProfileSerializer(user)
-            return Response(serializer.data)
-        except:
-            raise ValidationError('You need to log in first')
+            _profile = request.user.userprofile
+        except ObjectDoesNotExist:
+            _profile = {
+                "phone": '',
+                "image": '',
+            }
+        finally:
+            content = {
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+                'phone': _profile.phone,
+                'image': _profile.image
+            }
+            return Response(content, status=200)
 
 
 class ProductList(APIView):
@@ -88,5 +86,46 @@ class Product(APIView):
         item.save()
         return Response({'message': 'content is deleted'}, status=status.HTTP_204_NO_CONTENT)
 
+
+class AddToCart(APIView):
+
+    def post(self, request, pk, *agrs, **kwargs):
+        if pk is None:
+            return Response({'message':'invalid response'}, status = status.HTTP_400_BAD_REQUEST)
+        item = get_object_or_404(Item, pk=pk)
+        order_item, created = Cart.objects.get_or_create(
+            item = item,
+            user = request.user,
+            ordered = False,
+        )
+        order_qs = Order.objects.filter(user = request.user, ordered = False)
+        if order_qs.exists():
+            order = order_qs[0]
+            if order.items.filter(item__id = item.id).exists():
+                order_item.quantity +=1
+                order_item.save()
+                return Response({'message':'Product Added Successfully'},status= status.HTTP_200_OK)
+            else:
+                order.items.add(order_item)
+                return Response({'message':'Product Added Successfully'},status= status.HTTP_200_OK)
+        else:
+            ordered_date = timezone.now()
+            order = Order.objects.create(
+                user = request.user, ordered_date = ordered_date,
+            )
+            order.items.add(order_item)
+            return Response({'message':'Product Added Successfully'},status= status.HTTP_200_OK)
+
+
+class OrderDetailsView(generics.RetrieveAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated,]
+
+    def get_object(self):
+        try:
+            order = Order.objects.get(user= self.request.user, ordered = False)
+            return order
+        except ObjectDoesNotExist:
+            return Response({"message":"You don't have any order"}, status= status.HTTP_400_BAD_REQUEST)
 
 
