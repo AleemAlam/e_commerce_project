@@ -20,11 +20,18 @@ class Category(models.Model):
     def __str__(self):
         return self.title
 
+STATUS = (
+    ('OK', 'OK'),
+    ('NOT_OK', 'NOT_OK')
+)
+
 class Item(models.Model):
+
     title = models.CharField(max_length=200)
     price = models.FloatField()
     category = models.ForeignKey(Category, related_name='category', on_delete=models.CASCADE)
     description = models.TextField()
+    status = models.CharField(choices= STATUS ,max_length=10, default='OK')
     image = models.ImageField('items')
     discount_price = models.FloatField(blank=True, null=True, default=0)
 

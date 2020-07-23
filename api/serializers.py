@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from product.models import UserProfile
+from product.models import UserProfile, Item
 from django.contrib.auth.models import User
 
 
@@ -13,3 +13,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id','user','country', 'city', 'phone', 'image']
+
+
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ['id','title', 'category', 'description', 'image', 'discount_price', 'avg_rating', 'no_of_ratings' ,'price']
+
