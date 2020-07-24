@@ -3,14 +3,15 @@ from rest_framework.validators import ValidationError
 from rest_framework.views import APIView
 import razorpay
 
+
 client = razorpay.Client(auth=("rzp_test_9edOOxXrp0K6He", "NXf4xapbnGmzsaiW3XeF8mQM"))
 
 class Transaction(APIView):
     def post(self, request):
         amount = request.data.get('amount')
         item = request.data.get('item')
-        name = request.user.username
-        email = request.user.email
+        name = request.data.get('name')
+        email = request.data.get('email')
         order_receipt = 'order_receipt'
 
         if amount:
@@ -43,8 +44,6 @@ class TransactionStatus(APIView):
             'razorpay_order_id': response['razorpay_order_id'],
             'razorpay_signature': response['razorpay_signature']
         }
-
-        # VERIFYING SIGNATURE
         try:
             status = client.utility.verify_payment_signature(params_dict)
             return Response({'status': 'Payment Successful'})
