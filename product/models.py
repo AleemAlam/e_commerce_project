@@ -53,7 +53,7 @@ class Item(models.Model):
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete= models.CASCADE)
-    item = models.ForeignKey(Item, on_delete= models.CASCADE)
+    item = models.ForeignKey(Item, related_name='item', on_delete= models.CASCADE)
     ordered = models.BooleanField(default=False)
     quantity = models.IntegerField(default=1)
 
@@ -63,12 +63,7 @@ class Cart(models.Model):
     def get_total_item_price(self):
         return self.quantity * self.item.price
 
-    def get_total_discount_item_price(self):
-        return self.quantity * self.item.discount_price
-
     def get_final_price(self):
-        if self.item.discount_price:
-            return self.get_total_discount_item_price()
         return self.get_total_item_price()
 
 
@@ -85,6 +80,7 @@ class Order(models.Model):
     billing_address = models.CharField(max_length=400)
     received = models.BooleanField(default=False)
 
+    @property
     def get_total(self):
         total = 0
         for order_item in self.items.all():
@@ -93,10 +89,13 @@ class Order(models.Model):
 
 
     def __str__(self):
+        for item in self.items.item:
+            print('this is item',item)
+
         return self.user.username
 
 class Rating(models.Model):
-    item = models.ForeignKey(Item, related_name='item', on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     class Meta:
@@ -116,3 +115,20 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return self.address+ ' address of ' + self.user.user.username
+
+
+PAYMENT_STATUS=(
+    ('APPROVED', 'APPROVED'),
+    ('PENDING', 'FALIURE'),
+)
+
+class Payments(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    razorpay_payment_id = models.CharField(max_length=200)
+    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(choices= PAYMENT_STATUS, max_length=50)
+    amount = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.user.username
+

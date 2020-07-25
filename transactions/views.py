@@ -1,6 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework.views import APIView
+from product.models import Payments
+from django.core.mail import EmailMessage
+from django.conf import settings
 import razorpay
 
 
@@ -31,6 +34,18 @@ class Transaction(APIView):
                 context['name'] = name
                 context['email'] = email
                 context['order_id'] = order_id
+
+                email_subject = "New Order Placed"
+                admin_mail = 'admin@gmail.com'
+                message = f'New Order Place With order Id: {order_receipt} \n customer name: {request.user}\n Amount: {amount}'
+                email_message = EmailMessage(
+                    email_subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [admin_mail]
+                )
+                email_message.send()
+
                 return Response(context)
             raise ValidationError('Error')
         else:
@@ -39,6 +54,11 @@ class Transaction(APIView):
 class TransactionStatus(APIView):
     def post(self, request):
         response = request.data
+        payment = Payments.object.create(user = request.user,
+                                         razorpay_payment_id = response['razorpay_payment_id'],
+                                         status = 'APPROVED',
+                                         amount = response['amount'],
+                                         )
         params_dict = {
             'razorpay_payment_id': response['razorpay_payment_id'],
             'razorpay_order_id': response['razorpay_order_id'],
@@ -46,6 +66,16 @@ class TransactionStatus(APIView):
         }
         try:
             status = client.utility.verify_payment_signature(params_dict)
+            payment = Payments.object.create(user=request.user,
+                                             razorpay_payment_id=response['razorpay_payment_id'],
+                                             status='APPROVED',
+                                             amount=response['amount'],
+                                             )
             return Response({'status': 'Payment Successful'})
         except:
+            payment = Payments.object.create(user=request.user,
+                                             razorpay_payment_id=response['razorpay_payment_id'],
+                                             status='FALIURE',
+                                             amount=response['amount'],
+                                             )
             return Response({'status': 'Payment Faliure!!!'})

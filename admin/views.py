@@ -1,19 +1,31 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from django.http import HttpResponse
 from django.contrib.auth import login,logout,authenticate
-from product.models import Item, Rating, Cart, Order, Category
+from product.models import Item, Rating, Cart, Order, Category, Payments
 from product.forms import ItemForm, CategoryForm
 from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 # Create your views here.
 
 def admin(request):
     if request.user.is_authenticated and request.user.is_superuser:
-        return render(request, "admin/dashboard.html")
+        product_count = Item.objects.all().count()
+        user_count = User.objects.filter(is_staff=False).count()
+        total_product_sales = Order.objects.filter(ordered = True).count()
+        recent_corders = Order.objects.filter(ordered = True)
+        payments = Payments.objects.all()
+
+        context = {
+            'product_count':product_count,
+            'user_count':user_count,
+            'total_product_sales':total_product_sales,
+            'recent_orders':recent_corders,
+            'payments': payments
+        }
+        return render(request, "admin/dashboard.html", context)
     else:
         return redirect('admin_login')
 
@@ -63,6 +75,7 @@ def admin_login(request):
 def product_details(request, pk):
     product = get_object_or_404(Item, pk = pk)
     final_price = product.price - product.discount_price
+    form = ItemForm(instance=product)
     if request.method == "POST":
         form = ItemForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
@@ -75,8 +88,8 @@ def product_details(request, pk):
             messages.info(request, "Product Updated")
             return render(request, 'admin/product_details.html', {'product': product, 'final_price': final_price})
         else:
-            return render(request, '<h2>bad</h2>')
-    return render(request, 'admin/product_details.html', {'product': product,'final_price': final_price})
+            messages.error(request, "Please Enter Valid Details")
+    return render(request, 'admin/product_details.html', {'product': product, 'final_price': final_price, 'form': form})
 
 
 @login_required

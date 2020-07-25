@@ -86,8 +86,9 @@
             <div class="modal-body">
               <div class="container">
                 <form method="POST" enctype="multipart/form-data">
+                    {{form|crispy }}
                     {% csrf_token %}
-                    
+                    <!--
                     <div class="form-group">
                         <label for="title">Title:</label>
                         <input type="text" class="form-control" name="title" placeholder="Product Name" id="title" value="{{ product.title }}" required>
@@ -117,7 +118,7 @@
                     <div class="form-group">
                         <label for="price">Price:</label>
                         <input type="number" class="form-control" name="price" placeholder="Enter Price" id="price" value="{{ product.price }}"  required>
-                    </div>
+                    </div>-->
                     <button class="btn btn-success" type="submit">Update Product</button>
 
                 </form>
